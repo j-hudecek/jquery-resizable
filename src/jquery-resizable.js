@@ -40,6 +40,8 @@ Licensed under MIT License
             onDragEnd: null,
             // hook into each drag operation (event passed)
             onDrag: null,
+            //keep ratio of width to height
+            keepAspectRatio: true,
             // disable touch-action on $handle
             // prevents browser level actions like forward back gestures
             touchActionNone: true,
@@ -52,13 +54,14 @@ Licensed under MIT License
         return this.each(function () {
             var opt = $.extend({}, defaultOptions);
             if (!opt.instanceId)
-                opt.instanceId = "rsz_" + new Date().getTime();            
+                opt.instanceId = "rsz_" + new Date().getTime();
 
             var startPos, startTransition;
 
             // get the element to resize 
             var $el = $(this);
             var $handle;
+            opt.aspectRatio = this.clientHeight / this.clientWidth;
 
             if (options === 'destroy') {            
                 opt = $el.data('resizable');
@@ -131,6 +134,13 @@ Licensed under MIT License
                     newHeight = startPos.height - pos.y + startPos.y;
                 else
                     newHeight = startPos.height + pos.y - startPos.y;
+                
+                if (opt.keepAspectRatio) {
+                    if (e.offsetX === 0)
+                        newWidth = newHeight/opt.aspectRatio;
+                    else
+                        newHeight = newWidth*opt.aspectRatio;
+                }
 
                 if (!opt.onDrag || opt.onDrag(e, $el, newWidth, newHeight, opt) !== false) {
                     if (opt.resizeHeight)
